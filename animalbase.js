@@ -15,17 +15,26 @@ const Animal = {
   age: 0,
 };
 
+//Settings object for all the global variables.
+const settings = {
+  filter: "all",
+  sortBy: "name",
+  sortDir: "asc",
+};
+
 function start() {
   console.log("ready");
 
-  // TODO: Add event-listeners to filter and sort buttons
-  //Get the filter buttons
-  const filterButtons = document.querySelectorAll("button");
-
-  //Add eventlistener to filterButtons
-  filterButtons.forEach((button) => button.addEventListener("click", animalTypeFilter));
-
+  registerButtons();
   loadJSON();
+}
+
+function registerButtons() {
+  //Get filter buttons in html and make them clickable and add event listeners
+  document.querySelectorAll("[data-action='filter']").forEach((button) => button.addEventListener("click", selectFilter));
+
+  //Get sorting in html and make them clickable and add event listeners
+  document.querySelectorAll("[data-action='sort']").forEach((button) => button.addEventListener("click", selectSort));
 }
 
 async function loadJSON() {
@@ -55,52 +64,104 @@ function preapareObject(jsonObject) {
   return animal;
 }
 
+//------ALL filtering----------- Filtering by cat or dog or all animals.
+function selectFilter(event) {
+  const filter = event.target.dataset.filter;
+
+  console.log(`User selected: ${filter}`);
+  setFilter(filter);
+}
+
+function setFilter(filter) {
+  settings.filterBy = filter;
+  buildList();
+}
+
+function filterList(filteredList) {
+  //let filteredList = allAnimals;
+
+  if (settings.filterBy === "cat") {
+    //create a filtered list of only cats:
+    filteredList = allAnimals.filter(isCat);
+  } else if (settings.filterBy === "dog") {
+    //create a filtered list of only dogs:
+    filteredList = allAnimals.filter(isDog);
+  }
+
+  return filteredList;
+}
+
 //isCat function - checks if the animal type is a cat.
 function isCat(animal) {
-  if (animal.type === "cat") {
-    return true;
-  } else {
-    return false;
-  }
+  return animal.type === "cat";
 }
 
 //isDog function - checks if the animal type is a dog.
 function isDog(animal) {
-  if (animal.type === "dog") {
-    return true;
+  return animal.type === "dog";
+}
+
+//------ALL sorting----------- Sorting by name, type, desc, age in alphabetic order by using .sort.
+function selectSort(event) {
+  const sortBy = event.target.dataset.sort;
+  const sortDir = event.target.dataset.sortDirection;
+
+  //Find "old" sortBy element, and remove .sortBy
+  const oldElement = document.querySelector(`[data-sort='${settings.sortBy}']`);
+  oldElement.classList.remove("sortby");
+
+  //Indicate active sort
+  event.target.classList.add("sortby");
+
+  //Toggle the direction!
+  if (sortDir === "asc") {
+    event.target.dataset.sortDirection = "desc";
   } else {
-    return false;
+    event.target.dataset.sortDirection = "asc";
   }
+
+  console.log(`User selected: ${sortBy} - ${sortDir}`);
+  setSort(sortBy, sortDir);
 }
 
-//all function - makes it possible to see all animal types.
-function all() {
-  return true;
+function setSort(sortBy, sortDir) {
+  settings.sortBy = sortBy;
+  settings.sortDir = sortDir;
+
+  buildList();
 }
 
-//(My function) - where i filter the animals before they are displayed.
-function animalTypeFilter() {
-  let filteredAnimals;
+function sortList(sortedList) {
+  //let sortedList = allAnimals;
+  let direction = 1;
 
-  //get filter depending on data-filter attribute
-  filter = this.dataset.filter;
-
-  //filtering the animals corret depending on what type of animal they are and put it into filteredAnimals.
-  if (filter == "*") {
-    filteredAnimals = getFilterData(all);
-  } else if (filter == "cat") {
-    filteredAnimals = getFilterData(isCat);
-  } else if (filter == "dog") {
-    filteredAnimals = getFilterData(isDog);
+  if (settings.sortDir === "desc") {
+    direction = -1;
+  } else {
+    direction = 1;
   }
-  displayList(filteredAnimals);
+
+  sortedList = sortedList.sort(sortByProperty);
+
+  console.log("sortBy: ", settings.sortBy);
+
+  function sortByProperty(a, b) {
+    if (a[settings.sortBy] < b[settings.sortBy]) {
+      return -1 * direction;
+    } else {
+      return 1 * direction;
+    }
+  }
+
+  return sortedList;
 }
+//------sorting END-----------//
 
-function getFilterData(filterFunction) {
-  //filter on a criteia
-  let filteredAnimals = allAnimals.filter(filterFunction);
+function buildList() {
+  const currentList = filterList(allAnimals);
+  const sortedList = sortList(currentList);
 
-  return filteredAnimals;
+  displayList(sortedList);
 }
 
 function displayList(animals) {
