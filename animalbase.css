@@ -30,3 +30,60 @@
 #list tbody tr:nth-child(even) td {
   border-right: rgb(171, 219, 252) 1px dotted;
 }
+
+/* ****** STAR ****** */
+
+[data-field="star"] {
+  text-align: center;
+  cursor: pointer;
+  min-width: 2em;
+}
+
+/* ****** WINNERS ****** */
+td[data-field="winner"]::after {
+  content: "🏆";
+  cursor: pointer;
+  min-width: 2em;
+}
+
+td[data-field="winner"][data-winner="false"]::after {
+  filter: grayscale(1);
+}
+
+/* ****** PopUp WARNING ****** */
+.hide {
+  visibility: hidden;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(128, 128, 128, 0.575);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dialog {
+  box-shadow: 1px 1px 10px #333;
+  border-radius: 12px;
+  padding: 2rem;
+  background-color: rgb(238, 174, 149);
+  position: relative;
+}
+
+button.close_button {
+  position: absolute;
+  right: -1rem;
+  top: -1rem;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+}
+
+.dialog h1 {
+  margin-top: 0;
+}
